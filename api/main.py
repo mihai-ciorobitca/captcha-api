@@ -4,12 +4,20 @@ import numpy as np
 import cv2
 from base64 import b64decode, b64encode
 from io import BytesIO
+from requests import get
 # from uvicorn import run
 
 # app = FastAPI()
 
 def getCharacters():
-    pass
+    response = get("https://api.github.com/repos/mihai-ciorobitca/captcha-api/contents/api/data")
+    characters = {}
+    print(response.json)
+    for file in response.json():
+        if file["name"].endswith(".png"):
+            character = get(file["download_url"])
+            characters[b64encode(character.content).decode("utf-8")] = file["name"].replace(".png", "")
+    return characters
 
 def convertToBinary(img: Image):
     img = img.convert("RGB")
@@ -54,6 +62,7 @@ def read_captcha(imageBase64: str):
 
 def mainFunction():
     image = Image.open("example.png")
-    print(read_captcha(image))
+    print(getCharacters())
+    # print(read_captcha(image))
 
 mainFunction()
