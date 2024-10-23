@@ -26,7 +26,7 @@ characters = {
     'iVBORw0KGgoAAAANSUhEUgAAABQAAAAcCAAAAABEscC8AAAAXklEQVR4nK3Ryw6AIAxE0TuN///L4wKoFlygsSs4mfJIYZSdSzWoexXqEJNhQM1UKACke7MJX7FsCaYSOGqw1ZJ8RAPyTvIV6vj+pH9w/dN+u/pYJhxnqmC9StTZJp5OiBIwqLub/QAAAABJRU5ErkJggg==': 'e',
     'iVBORw0KGgoAAAANSUhEUgAAABQAAAAmCAAAAADhUOR3AAAAT0lEQVR4nM3SMQoAIAxD0R/x/lfWQdFaOjgU1EV5BJqCwpw2b3mweIS0TDtZApt42kA7xCYzUQTLVD8ZoLrQfrWofHLPHFSEbyv9hMDlr+sQ4gpHfFx6uwAAAABJRU5ErkJggg==': 'f'
 }
-def convertToBinary(imgBase64: str):
+async def convertToBinary(imgBase64: str):
     img = Image.open(BytesIO(b64decode(imgBase64)))
     img = img.convert("RGB")
     px = np.array(img)
@@ -35,7 +35,7 @@ def convertToBinary(imgBase64: str):
             if not np.all(px[rows, columns] == 255):
                 px[rows, columns] = [0, 0, 0]
     return Image.fromarray(px).convert("L")
-def extractCharacters(img: Image):
+async def extractCharacters(img: Image):
     image = np.array(img)
     contours, _ = cv2.findContours(
         image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -51,7 +51,7 @@ def extractCharacters(img: Image):
         object_pil = Image.fromarray(object_cropped)
         objects.append(object_pil)
     return objects
-def read_captcha(imageBase64: str):
+async def read_captcha(imageBase64: str):
     imgBinary = convertToBinary(imageBase64)
     extractedCharacters = extractCharacters(imgBinary)
     captchaString = ""
@@ -64,12 +64,12 @@ def read_captcha(imageBase64: str):
     return captchaString
 
 @app.post('/solve-captcha')
-def mainFunction(request: Request):
+async def mainFunction(request: Request):
     imageBase64 = request.json['captcha']
     return {"captcha": read_captcha(imageBase64)}
 
 @app.get('/')
-def mainFunction():
+async def mainFunction():
     return {"message": "Captcha API"}
 
 
