@@ -67,6 +67,10 @@ def read_captcha(imageBase64: str):
 def mainFunction(imageBase64: str):
     return {"captcha": read_captcha(imageBase64)}
 
+@app.get('/')
+def mainFunction():
+    return {"message": "Captcha API"}
+
 
 if __name__ == "__main__":
-    run()
+    run(app)
