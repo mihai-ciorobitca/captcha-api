@@ -1,16 +1,18 @@
-from fastapi import FastAPI
+# from fastapi import FastAPI
 from PIL import Image
 import numpy as np
-from os import listdir
 import cv2
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from io import BytesIO
-from uvicorn import run
+# from uvicorn import run
 
-app = FastAPI()
+# app = FastAPI()
 
-def convertToBinary(imageBase64):
-    img = Image.open(BytesIO(b64decode(imageBase64))).convert("RGB")
+def getCharacters():
+    pass
+
+def convertToBinary(img: Image):
+    img = img.convert("RGB")
     px = np.array(img)
     for rows in range(px.shape[0]):
         for columns in range(px.shape[1]):
@@ -18,14 +20,16 @@ def convertToBinary(imageBase64):
                 px[rows, columns] = [0, 0, 0]
     return Image.fromarray(px).convert("L")
 
-def extractCharacters(img):
+
+def extractCharacters(img: Image):
     image = np.array(img)
-    contours, _ = cv2.findContours(image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(
+        image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     objects = []
     contoursSorted = sorted(contours, key=lambda x: cv2.boundingRect(x)[0])
     mask = np.zeros_like(image)
     for contour in contoursSorted:
-        cv2.drawContours(mask, [contour], 0, color=255, thickness=-1) 
+        cv2.drawContours(mask, [contour], 0, color=255, thickness=-1)
         # 0 is the index of contour and tickeness is set to -1 so that it fills the contour
         object_extracted = cv2.bitwise_and(image, image, mask=mask)
         x, y, w, h = cv2.boundingRect(contour)
@@ -34,25 +38,22 @@ def extractCharacters(img):
         objects.append(object_pil)
     return objects
 
-@app.post("/captcha")
-async def read_captcha(imageBase64: str):
-    characters = listdir("data")
-    charactersImages = [Image.open("data/" + file) for file in characters]
+
+def read_captcha(imageBase64: str):
+    characters = getCharacters()
     imgBinary = convertToBinary(imageBase64)
     extractedCharacters = extractCharacters(imgBinary)
     captchaString = ""
     for extractedCharacter in extractedCharacters:
-        for index, characterImage in enumerate(charactersImages):
-            if np.array_equal(np.array(extractedCharacter), np.array(characterImage)):
-                captchaString += characters[index].replace(".png", "")
-    return {"captcha": captchaString}
-
-@app.get("/")
-async def root():  
-    characters = listdir("data")
-    return {"characters": characters}
+        extractCharacterBase64 = b64encode(
+            extractedCharacter.tobytes()).decode("utf-8")
+        if extractCharacterBase64 in characters:
+            captchaString += characters[extractCharacterBase64]
+    return captchaString
 
 
-if __name__ == '__main__':
-    run(app)
+def mainFunction():
+    image = Image.open("example.png")
+    print(read_captcha(image))
 
+mainFunction()
