@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from PIL import Image
 import numpy as np
 import cv2
@@ -64,7 +64,8 @@ def read_captcha(imageBase64: str):
     return captchaString
 
 @app.post('/solve-captcha')
-def mainFunction(imageBase64: str):
+def mainFunction(request: Request):
+    imageBase64 = request.json['captcha']
     return {"captcha": read_captcha(imageBase64)}
 
 @app.get('/')
