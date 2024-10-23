@@ -63,7 +63,7 @@ def read_captcha(imageBase64: str):
             captchaString += characters[extractedCharacterBase64]
     return captchaString
 
-@app.route('/solve-captcha', methods=['POST'])
+@app.post('/solve-captcha')
 def mainFunction(imageBase64: str):
     return {"captcha": read_captcha(imageBase64)}
 
