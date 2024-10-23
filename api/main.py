@@ -52,8 +52,8 @@ async def extractCharacters(img: Image):
         objects.append(object_pil)
     return objects
 async def read_captcha(imageBase64: str):
-    imgBinary = convertToBinary(imageBase64)
-    extractedCharacters = extractCharacters(imgBinary)
+    imgBinary = await convertToBinary(imageBase64)
+    extractedCharacters = await extractCharacters(imgBinary)
     captchaString = ""
     for extractedCharacter in extractedCharacters:
         buffered = BytesIO()
@@ -65,8 +65,9 @@ async def read_captcha(imageBase64: str):
 
 @app.post('/solve-captcha')
 async def mainFunction(request: Request):
-    imageBase64 = request.json['captcha']
-    return {"captcha": read_captcha(imageBase64)}
+    body = await request.json()
+    imageBase64 = body['captcha']
+    return {"captcha": await read_captcha(imageBase64)}
 
 @app.get('/')
 async def mainFunction():
@@ -75,3 +76,4 @@ async def mainFunction():
 
 if __name__ == "__main__":
     run(app)
+

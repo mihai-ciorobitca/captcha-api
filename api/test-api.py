@@ -3,7 +3,7 @@ from PIL import Image
 from base64 import b64encode
 from io import BytesIO
 
-url = "https://captcha-api-green.vercel.app/solve-captcha"
+url = "http://127.0.0.1:8000/solve-captcha"
 
 img = Image.open("captcha.png")
 
