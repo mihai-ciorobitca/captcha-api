@@ -48,7 +48,8 @@ async def read_captcha(imageBase64: str):
 
 @app.get("/")
 async def root():  
-    return {"message": "API is running"}
+    characters = listdir("characters")
+    return {"characters": characters}
 
 app.run(host="0.0.0.0", port=8000)
 
