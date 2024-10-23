@@ -5,6 +5,7 @@ from os import listdir
 import cv2
 from base64 import b64decode
 from io import BytesIO
+from uvicorn import run
 
 app = FastAPI()
 
@@ -51,5 +52,7 @@ async def root():
     characters = listdir("data")
     return {"characters": characters}
 
-app.run(host="0.0.0.0", port=8000)
+
+if __name__ == '__main__':
+    run(app)
 

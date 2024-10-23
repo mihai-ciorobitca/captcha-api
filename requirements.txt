@@ -2,3 +2,4 @@ fastapi
 Pillow
 numpy
 opencv-python-headless
+uvicorn
