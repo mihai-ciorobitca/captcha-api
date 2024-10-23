@@ -35,8 +35,8 @@ def extractCharacters(img):
 
 @app.post("/captcha")
 async def read_captcha(imageBase64: str):
-    characters = listdir("characters")
-    charactersImages = [Image.open("characters/" + file) for file in characters]
+    characters = listdir("data")
+    charactersImages = [Image.open("data/" + file) for file in characters]
     imgBinary = convertToBinary(imageBase64)
     extractedCharacters = extractCharacters(imgBinary)
     captchaString = ""
@@ -48,7 +48,7 @@ async def read_captcha(imageBase64: str):
 
 @app.get("/")
 async def root():  
-    characters = listdir("characters")
+    characters = listdir("data")
     return {"characters": characters}
 
 app.run(host="0.0.0.0", port=8000)

@@ -1,4 +1,6 @@
+/*************  ✨ Codeium Command 🌟  *************/
 fastapi
 Pillow
 numpy
-opencv-python
+opencv-python-headless
+/******  43c54ae4-cbb7-49e1-9767-6755c362abae  *******/
