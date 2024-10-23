@@ -1,13 +1,13 @@
-# from fastapi import FastAPI
+from fastapi import FastAPI
 from PIL import Image
 import numpy as np
 import cv2
 from base64 import b64decode, b64encode
 from io import BytesIO
 from requests import get
-# from uvicorn import run
+from uvicorn import run
 
-# app = FastAPI()
+app = FastAPI()
 
 characters = {
     'iVBORw0KGgoAAAANSUhEUgAAABYAAAAnCAAAAAAu+efvAAAAYUlEQVR4nO2TMRaAMAhDE+5/ZxyQSiH6HB1kgg8NDCmwwv3KeaIGuMNENig8Wl7EsmA292HrNArrNF7YQOsSEaY0nqZ//AnsGr8UcUhrAqCx83SqduwUobQmcft36q4idgD89xdAUdWvkgAAAABJRU5ErkJggg==': '0',
@@ -27,7 +27,6 @@ characters = {
     'iVBORw0KGgoAAAANSUhEUgAAABQAAAAcCAAAAABEscC8AAAAXklEQVR4nK3Ryw6AIAxE0TuN///L4wKoFlygsSs4mfJIYZSdSzWoexXqEJNhQM1UKACke7MJX7FsCaYSOGqw1ZJ8RAPyTvIV6vj+pH9w/dN+u/pYJhxnqmC9StTZJp5OiBIwqLub/QAAAABJRU5ErkJggg==': 'e',
     'iVBORw0KGgoAAAANSUhEUgAAABQAAAAmCAAAAADhUOR3AAAAT0lEQVR4nM3SMQoAIAxD0R/x/lfWQdFaOjgU1EV5BJqCwpw2b3mweIS0TDtZApt42kA7xCYzUQTLVD8ZoLrQfrWofHLPHFSEbyv9hMDlr+sQ4gpHfFx6uwAAAABJRU5ErkJggg==': 'f'
 }
-
 def convertToBinary(imgBase64: str):
     img = Image.open(BytesIO(b64decode(imgBase64)))
     img = img.convert("RGB")
@@ -37,8 +36,6 @@ def convertToBinary(imgBase64: str):
             if not np.all(px[rows, columns] == 255):
                 px[rows, columns] = [0, 0, 0]
     return Image.fromarray(px).convert("L")
-
-
 def extractCharacters(img: Image):
     image = np.array(img)
     contours, _ = cv2.findContours(
@@ -54,11 +51,7 @@ def extractCharacters(img: Image):
         object_cropped = object_extracted[y:y+h, x:x+w]
         object_pil = Image.fromarray(object_cropped)
         objects.append(object_pil)
-        for i, object in enumerate(objects):
-            object.save(f"{i}.png")
     return objects
-
-
 def read_captcha(imageBase64: str):
     imgBinary = convertToBinary(imageBase64)
     extractedCharacters = extractCharacters(imgBinary)
@@ -71,12 +64,10 @@ def read_captcha(imageBase64: str):
             captchaString += characters[extractedCharacterBase64]
     return captchaString
 
+@app.route('/solve-captcha', methods=['POST'])
+def mainFunction(imageBase64: str):
+    return {"captcha": read_captcha(imageBase64)}
 
-def mainFunction():
-    image = Image.open("example.png")
-    buffered = BytesIO()
-    image.save(buffered, format="PNG")
-    imgBase64 = b64encode(buffered.getvalue()).decode("utf-8")
-    print(read_captcha(imgBase64))
 
-mainFunction()
+if __name__ == "__main__":
+    run()
