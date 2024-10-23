@@ -4,7 +4,6 @@ import numpy as np
 import cv2
 from base64 import b64decode, b64encode
 from io import BytesIO
-from requests import get
 from uvicorn import run
 
 app = FastAPI()
